@@ -1,0 +1,3 @@
+C:/Users/Majdp/CLionProjects/WeatherApp/cmake-build-debug/CMakeFiles/WeatherApp.dir
+C:/Users/Majdp/CLionProjects/WeatherApp/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Majdp/CLionProjects/WeatherApp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
