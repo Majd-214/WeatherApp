@@ -4,4 +4,6 @@ project(WeatherApp)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(WeatherApp
-        main.cpp)
+        main.cpp
+        Weather.h
+        Weather.cpp)
