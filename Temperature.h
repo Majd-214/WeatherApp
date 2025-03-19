@@ -4,11 +4,15 @@
 
 #ifndef TEMPERATURE_H
 #define TEMPERATURE_H
-
+using namespace std;
 
 
 class Temperature {
+private:
+  string unit;
+  float value;
 
+public:
 };
 
 
