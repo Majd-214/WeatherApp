@@ -4,13 +4,8 @@
 
 #ifndef HUMIDITY_H
 #define HUMIDITY_H
+#include "Properties.h"
 
+class Humidity : protected Properties {};
 
-
-class Humidity {
-
-};
-
-
-
-#endif //HUMIDITY_H
+#endif  // HUMIDITY_H
