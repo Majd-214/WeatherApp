@@ -6,4 +6,6 @@ set(CMAKE_CXX_STANDARD 14)
 add_executable(WeatherApp
         main.cpp
         Weather.h
-        Weather.cpp)
+        Weather.cpp
+        Properties.cpp
+        Properties.h)
