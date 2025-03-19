@@ -11,20 +11,18 @@
 using namespace std;
 
 class Properties {
- private:
-  string name, unit;
+ protected:
   double value;
+  string unit;
 
  public:
   Properties();
-  Properties(string name, double value, string unit);
+  Properties(double value, string unit);
 
-  string getName() const;
   double getValue() const;
   string getUnit() const;
 
   void setValue(double value);
-  void setName(string name);
   void setUnit(string unit);
 };
 
