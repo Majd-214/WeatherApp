@@ -12,12 +12,11 @@ using namespace std;
 
 class Properties {
  protected:
-  double value;
   string unit;
+  double value;
 
  public:
   Properties();
-  Properties(double value, string unit);
 
   double getValue() const;
   string getUnit() const;
