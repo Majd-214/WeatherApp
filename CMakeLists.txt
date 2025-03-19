@@ -10,6 +10,4 @@ add_executable(WeatherApp
         Properties.cpp
         Properties.h
         Humidity.cpp
-        Humidity.h
-        Temperature.h
-        Temperature.cpp)
+        Humidity.h)
