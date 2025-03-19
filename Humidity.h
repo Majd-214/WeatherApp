@@ -6,6 +6,11 @@
 #define HUMIDITY_H
 #include "Properties.h"
 
-class Humidity : protected Properties {};
+class Humidity : protected Properties {
+ public:
+  Humidity();
+  Humidity(Properties &);
+  Humidity(double value, string unit);
+};
 
 #endif  // HUMIDITY_H
