@@ -3,3 +3,8 @@
 //
 
 #include "Temperature.h"
+Temperature::Temperature() : Properties(0, "%") {}
+Temperature::Temperature(Properties &property) {
+  this->unit = property.getUnit();
+  this->value = property.getValue();
+}

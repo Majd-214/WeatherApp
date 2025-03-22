@@ -4,9 +4,14 @@
 
 #ifndef TEMPERATURE_H
 #define TEMPERATURE_H
-#include "Properties.h"
+#include "properties.h"
 using namespace std;
 
-class Temperature : protected Properties {};
 
-#endif  // TEMPERATURE_H
+class Temperature: protected Properties {
+
+
+
+};
+
+#endif //TEMPERATURE_H
