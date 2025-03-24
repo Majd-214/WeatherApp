@@ -8,22 +8,16 @@
 #include <iostream>
 #include <string>
 
-#include "Property.h"
-
 using namespace std;
 
 class Weather {
-private:
-    string test;
-    Property temperature;
-    Property humidity;
-    Property windSpeed;
-    Property windDirection;
+ private:
+  string test;
 
-public:
-    Weather();
+    Property UVIndex
 
-    Weather(string test);
 };
 
 #endif //WEATHERAPP_WEATHER_H_
+// int index (1-10)
+//string level (low moderate high)
