@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <Property.h>
 
 using namespace std;
 
@@ -14,7 +15,11 @@ class Weather {
  private:
   string test;
 
-    Property UVIndex
+    Property UVIndex;
+    Property Humidity;
+    Property Temperature;
+    public:
+
 
 };
 
