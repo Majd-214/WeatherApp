@@ -8,11 +8,22 @@
 #include <iostream>
 #include <string>
 
+#include "Property.h"
+
 using namespace std;
 
 class Weather {
- private:
-  string test;
+private:
+    string test;
+    Property temperature;
+    Property humidity;
+    Property windSpeed;
+    Property windDirection;
+
+public:
+    Weather();
+
+    Weather(string test);
 };
 
 #endif //WEATHERAPP_WEATHER_H_
