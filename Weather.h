@@ -11,14 +11,24 @@
 
 using namespace std;
 
-class Weather {
- private:
-  string test;
+class Weather
+{
+private:
+    string test;
 
     Property UVIndex;
     Property Humidity;
     Property Temperature;
-    public:
+
+public:
+
+    void setUVIndex();
+    void setHumidity();
+    void setTemperature();
+
+    double getUVIndex()const;
+    double getHumidity() const ;
+    double getTemperature() const ;
 
 
 };
