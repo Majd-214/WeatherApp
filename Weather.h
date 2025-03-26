@@ -1,38 +1,25 @@
-//
-// Created by Majd Aburas on 18-Mar-2025.
-//
+// Weather.h
+#ifndef WEATHER_H
+#define WEATHER_H
 
-#ifndef WEATHERAPP_WEATHER_H_
-#define WEATHERAPP_WEATHER_H_
+#include "Property.h"
 
-#include <iostream>
-#include <string>
-#include <Property.h>
-
-using namespace std;
-
-class Weather
-{
-private:
-    string test;
-
-    Property UVIndex;
-    Property Humidity;
-    Property Temperature;
-
-public:
-
-    void setUVIndex();
-    void setHumidity();
-    void setTemperature();
-
-    double getUVIndex()const;
-    double getHumidity() const ;
-    double getTemperature() const ;
-
-
+enum PropertyIndex {
+    TEMPERATURE = 0,
+    HUMIDITY = 1,
+    WIND_SPEED = 2,
+    // Add more properties as needed
+    NUM_PROPERTIES = 3 // UPDATE to Latest Index
 };
 
-#endif //WEATHERAPP_WEATHER_H_
-// int index (1-10)
-//string level (low moderate high)
+class Weather {
+private:
+    Property* properties[NUM_PROPERTIES];
+public:
+    Weather();
+    ~Weather();
+    void setProperty(PropertyIndex index, Property* property);
+    Property* getProperty(PropertyIndex index) const;
+};
+
+#endif // WEATHER_H

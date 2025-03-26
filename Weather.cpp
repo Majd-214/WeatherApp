@@ -1,16 +1,40 @@
-//
-// Created by Majd Aburas on 18-Mar-2025.
-//
-
+// Weather.cpp
 #include "Weather.h"
-#include <string>
+#include "Property.h"
+#include <iostream>
 
 using namespace std;
 
-Weather
-// dog::dog() : breed(""), age(0), sex(""), maturity("") {}
+Weather::Weather() {
+    for (int i = 0; i < NUM_PROPERTIES; ++i) {
+        properties[i] = nullptr;
+    }
+}
 
-weather.setUVIndex(10);
-weather.setTemperature();
-weather.setHumidity();
+Weather::~Weather() {
+    for (int i = 0; i < NUM_PROPERTIES; ++i) {
+        if (properties[i] != nullptr) {
+            delete properties[i];
+        }
+    }
+}
 
+void Weather::setProperty(PropertyIndex index, Property* property) {
+    if (index >= 0 && index < NUM_PROPERTIES) {
+        if (properties[index] != nullptr) {
+            delete properties[index];
+        }
+        properties[index] = property;
+    } else {
+        cerr << "Error: Invalid property index: " << index << endl;
+    }
+}
+
+Property* Weather::getProperty(PropertyIndex index) const {
+    if (index >= 0 && index < NUM_PROPERTIES) {
+        return properties[index];
+    } else {
+        cerr << "Error: Invalid property index: " << index << endl;
+        return nullptr;
+    }
+}
