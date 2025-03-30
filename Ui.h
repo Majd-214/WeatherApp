@@ -1,16 +1,10 @@
-//
-// Created by Majdp on 30-Mar-2025.
-//
+#ifndef WEATHER_UI_H
+#define WEATHER_UI_H
 
-#ifndef UI_H
-#define UI_H
+#include "Weather.h"
+#include <iostream>
 
+void displayWeather(const Weather& weather);
+void updateWeather(Weather& weather);
 
-
-class UI {
-
-};
-
-
-
-#endif //UI_H
+#endif
