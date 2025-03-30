@@ -34,4 +34,7 @@ public:
   Property *getProperty(PropertyIndex index) const;
 };
 
+
+
+
 #endif // WEATHER_H
