@@ -2,10 +2,10 @@
 #include <iostream>
 using namespace std;
 
-// Default constructor
+//  constructor
 Forecast::Forecast() : Weather() {
     for (int i = 0; i < 24; i++) {
-        // Initialize each hour with default values
+
         hour[i].setHour(i);
         hour[i].setTemperature(0.0);
         hour[i].setCondition("Unknown");
