@@ -1,96 +1,47 @@
 #include "Forecast.h"
-#include "Weather.h"
 #include <iostream>
-#include <string>
 using namespace std;
 
+// Default constructor
 Forecast::Forecast() : Weather() {
-    // Initialize each hour with defaults
     for (int i = 0; i < 24; i++) {
-        hourly[i].setHour(i);
-        hourly[i].setTemperature(0.0);
-        hourly[i].setCondition("Unknown");
+        // Initialize each hour with default values
+        hour[i].setHour(i);
+        hour[i].setTemperature(0.0);
+        hour[i].setCondition("Unknown");
     }
 }
 
+// temperature and condition
 Forecast::Forecast(double defaultTemp, const string &defaultCond)
-    : Weather(0, defaultTemp, defaultCond)
+    : Weather(0, defaultTemp, defaultCond) // Calls base class
 {
-    // Initialize each hour to the given defaults
     for (int i = 0; i < 24; i++) {
-        hourly[i].setHour(i);
-        hourly[i].setTemperature(defaultTemp);
-        hourly[i].setCondition(defaultCond);
+        hour[i].setHour(i);
+        hour[i].setTemperature(defaultTemp);
+        hour[i].setCondition(defaultCond);
     }
 }
 
 void Forecast::setHourlyWeather(int h, double temp, const string &cond) {
     if (h >= 0 && h < 24) {
-        hourly[h].setHour(h);
-        hourly[h].setTemperature(temp);
-        hourly[h].setCondition(cond);
+        hour[h].setHour(h);
+        hour[h].setTemperature(temp);
+        hour[h].setCondition(cond);
     }
 }
 
 Weather Forecast::getHourlyWeather(int h) const {
     if (h >= 0 && h < 24) {
-        return hourly[h];
+        return hour[h];
     }
-    // Return a default Weather if hour is invalid
-    return Weather();#include "Forecast.h"
-#include "Weather.h"
-#include <iostream>
-#include <string>
-using namespace std;
-
-Forecast::Forecast() : Weather() {
-    // Initialize each hour with defaults
-    for (int i = 0; i < 24; i++) {
-        hourly[i].setHour(i);
-        hourly[i].setTemperature(0.0);
-        hourly[i].setCondition("Unknown");
-    }
-}
-
-Forecast::Forecast(double defaultTemp, const string &defaultCond)
-    : Weather(0, defaultTemp, defaultCond)
-{
-    // Initialize each hour to the given defaults
-    for (int i = 0; i < 24; i++) {
-        hourly[i].setHour(i);
-        hourly[i].setTemperature(defaultTemp);
-        hourly[i].setCondition(defaultCond);
-    }
-}
-
-void Forecast::setHourlyWeather(int h, double temp, const string &cond) {
-    if (h >= 0 && h < 24) {
-        hourly[h].setHour(h);
-        hourly[h].setTemperature(temp);
-        hourly[h].setCondition(cond);
-    }
-}
-
-Weather Forecast::getHourlyWeather(int h) const {
-    if (h >= 0 && h < 24) {
-        return hourly[h];
-    }
-    // Return a default Weather if hour is invalid
+    // If out of range, return a default Weather object
     return Weather();
 }
 
 void Forecast::display() const {
-    std::cout << "24-Hour Forecast:\n";
+    cout << "24-Hour Forecast:" << endl;
     for (int i = 0; i < 24; i++) {
-        hourly[i].display();
-    }
-}
-
-}
-
-void Forecast::display() const {
-    std::cout << "24-Hour Forecast:\n";
-    for (int i = 0; i < 24; i++) {
-        hourly[i].display();
+        hour[i].display();
     }
 }

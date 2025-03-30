@@ -66,5 +66,7 @@ void Weather::setCondition(const string &cond) {
 }
 
 void Weather::display() const {
-    cout << "Hour: " << hour << ", Temp: " << temperature << "°C << ", Condition: " << condition << endl;
+    cout << "Hour: " << hour
+         << ", Temp: " << temperature << "°C"
+         << ", Condition: " << condition << endl;
 }

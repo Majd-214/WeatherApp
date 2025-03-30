@@ -17,8 +17,10 @@ private:
 public:
     Forecast();
     Forecast(double h, double temp, const string &cond);
+    Forecast(double defaultTemp, const string &defaultCond);
 
-    void setHourlyWeather(int hour, double temp, const std::string &cond);
+
+    void setHourlyWeather(int hour, double temp, const string &cond);
 
     // Get the Weather object for a specific hour
     Weather getHourlyWeather(int hour) const;
