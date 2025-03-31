@@ -2,34 +2,46 @@
 #ifndef FORECAST_H
 #define FORECAST_H
 #include "Weather.h"
+#include <vector>
 
-class ForecastDay {
-    private:
+class HourlyForecast {
+private:
+    Weather weather;
+    std::string time;
+
+public:
+    HourlyForecast(const Weather& w, const std::string& t) : weather(w), time(t) {}
+    const Weather& getWeather() const { return weather; }
+    std::string getTime() const { return time; }
+};
+
+class DailyForecast {
+private:
     std::string date;
-    Weather* hourlyForecasts;
-    int numHourlyForecasts;
+    Weather dayWeather;
+    std::vector<HourlyForecast> hourlyForecasts;
 
-    public:
-    ForecastDay(const std::string& d, int numHours);
-    ~ForecastDay();
-    void addHourlyForecast(int hour, const Weather& forecast);
-    const Weather& getHourlyForecast(int hour) const;
-    int getNumHourlyForecasts() const;
-    std::string getDate() const;
+public:
+    DailyForecast(const std::string& d, const Weather& dw) : date(d), dayWeather(dw) {}
+    void addHourlyForecast(const HourlyForecast& forecast) {
+        hourlyForecasts.push_back(forecast);
+    }
+    const std::vector<HourlyForecast>& getHourlyForecasts() const { return hourlyForecasts; }
+    const Weather& getDayWeather() const { return dayWeather; }
+    std::string getDate() const { return date; }
 };
 
 class Forecast {
-    private:
-    ForecastDay** forecastDays;
-    int numForecastDays;
+private:
+    std::vector<DailyForecast> dailyForecasts;
 
-    public:
-    Forecast(int numDays);
-    ~Forecast();
-    void addForecastDay(int dayIndex, ForecastDay* day);
-    const ForecastDay* getForecastDay(int dayIndex) const;
-    int getNumForecastDays() const;
-    void display() const;
+public:
+    void addDailyForecast(const DailyForecast& forecast) {
+        dailyForecasts.push_back(forecast);
+    }
+    const std::vector<DailyForecast>& getDailyForecasts() const { return dailyForecasts; }
+    void displayHourly() const;
+    void displayDaily() const;
 };
 
 #endif // FORECAST_H

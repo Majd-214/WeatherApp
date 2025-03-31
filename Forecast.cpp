@@ -2,90 +2,66 @@
 #include "Forecast.h"
 #include <iostream>
 #include <iomanip>
+#include <sstream>
+#include <ctime>
 
-ForecastDay::ForecastDay(const std::string& d, int numHours) : date(d), numHourlyForecasts(numHours) {
-    hourlyForecasts = new Weather[numHourlyForecasts];
-}
-
-ForecastDay::~ForecastDay() {
-    delete[] hourlyForecasts;
-}
-
-void ForecastDay::addHourlyForecast(int hour, const Weather& forecast) {
-    if (hour >= 0 && hour < numHourlyForecasts) {
-        hourlyForecasts[hour] = forecast;
-    }
-}
-
-const Weather& ForecastDay::getHourlyForecast(int hour) const {
-    if (hour >= 0 && hour < numHourlyForecasts) {
-        return hourlyForecasts[hour];
-    }
-    // Return a default Weather object if out of range
-    return Weather();
-}
-
-int ForecastDay::getNumHourlyForecasts() const {
-    return numHourlyForecasts;
-}
-
-std::string ForecastDay::getDate() const {
-    return date;
-}
-
-Forecast::Forecast(int numDays) : numForecastDays(numDays) {
-    forecastDays = new ForecastDay*[numForecastDays];
-    for (int i = 0; i < numForecastDays; ++i) {
-        forecastDays[i] = nullptr;
-    }
-}
-
-Forecast::~Forecast() {
-    for (int i = 0; i < numForecastDays; ++i) {
-        delete forecastDays[i];
-    }
-    delete[] forecastDays;
-}
-
-void Forecast::addForecastDay(int dayIndex, ForecastDay* day) {
-    if (dayIndex >= 0 && dayIndex < numForecastDays) {
-        forecastDays[dayIndex] = day;
-    }
-}
-
-const ForecastDay* Forecast::getForecastDay(int dayIndex) const {
-    if (dayIndex >= 0 && dayIndex < numForecastDays) {
-        return forecastDays[dayIndex];
-    }
-    return nullptr;
-}
-
-int Forecast::getNumForecastDays() const {
-    return numForecastDays;
-}
-
-void Forecast::display() const {
-    std::cout << "\nWeather Forecast:" << std::endl;
-    for (int i = 0; i < numForecastDays; ++i) {
-        const ForecastDay* day = forecastDays[i];
-        if (day) {
-            std::cout << "  Date: " << day->getDate() << std::endl;
-            for (int j = 0; j < day->getNumHourlyForecasts(); ++j) {
-                const Weather& hour = day->getHourlyForecast(j);
-                std::cout << "    Time: " << hour.getProperty(LAST_UPDATED)->getValue() << " (Epoch)" << std::endl;
-                for (int k = 0; k < NUM_PROPERTIES; ++k) {
-                    Property* prop = hour.getProperty(static_cast<PropertyIndex>(k));
-                    if (prop != nullptr) {
-                        std::cout << "      " << std::left << std::setw(15) << prop->getName() << ": " << std::fixed << std::setprecision(2) << prop->getValue();
-                        if (!prop->getUnit().empty()) {
-                            std::cout << " " << prop->getUnit();
-                        }
-                        std::cout << std::endl;
-                    }
+// Helper function to display properties of a Weather object (using std::cout)
+void displayWeatherPropertiesForForecast(const Weather& weather) {
+     bool dataDisplayed = false;
+     for (int k = 0; k < NUM_PROPERTIES; ++k) {
+        Property* prop = weather.getProperty(static_cast<PropertyIndex>(k));
+        // Only display if property exists AND it's not the 'Last Updated' epoch time (less relevant for forecast)
+        if (prop != nullptr && static_cast<PropertyIndex>(k) != LAST_UPDATED) {
+            // Simple check to maybe hide zero values unless it's temperature
+             if (prop->getValue() != 0 || static_cast<PropertyIndex>(k) == TEMPERATURE || static_cast<PropertyIndex>(k) == FEELS_LIKE)
+             {
+                 std::cout << "      " << std::left << std::setw(15) << prop->getName() << ": "
+                           << std::fixed << std::setprecision(1) // Consistent precision
+                           << prop->getValue();
+                // Append unit only if it's not empty
+                if (!prop->getUnit().empty()) {
+                     std::cout << " " << prop->getUnit();
                 }
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
+                 std::cout << std::endl;
+                 dataDisplayed = true;
+             }
         }
     }
+     if (!dataDisplayed) {
+         std::cout << "      (No specific forecast details available)" << std::endl;
+     }
+}
+
+
+void Forecast::displayHourly() const {
+    std::cout << "\n--- Hourly Forecast ---" << std::endl;
+    if (dailyForecasts.empty()) {
+        std::cout << "No hourly forecast data available." << std::endl;
+        return;
+    }
+    for (const auto& day : dailyForecasts) {
+        std::cout << "\n  Date: " << day.getDate() << std::endl;
+         if (day.getHourlyForecasts().empty()) {
+             std::cout << "    No hourly data for this day." << std::endl;
+             continue;
+         }
+        for (const auto& hour : day.getHourlyForecasts()) {
+            std::cout << "    Time: " << hour.getTime() << std::endl;
+            displayWeatherPropertiesForForecast(hour.getWeather()); // Use helper
+        }
+    }
+     std::cout << "\n--- End of Hourly Forecast ---" << std::endl;
+}
+
+void Forecast::displayDaily() const {
+    std::cout << "\n--- Daily Forecast Summary ---" << std::endl;
+     if (dailyForecasts.empty()) {
+        std::cout << "No daily forecast data available." << std::endl;
+        return;
+    }
+    for (const auto& day : dailyForecasts) {
+        std::cout << "\n  Date: " << day.getDate() << std::endl;
+        displayWeatherPropertiesForForecast(day.getDayWeather()); // Use helper
+    }
+     std::cout << "\n--- End of Daily Forecast ---" << std::endl;
 }
