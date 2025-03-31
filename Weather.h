@@ -7,34 +7,28 @@
 enum PropertyIndex {
   TEMPERATURE = 0,
   FEELS_LIKE = 1,
-  HIGH_TEMP = 2,
-  LOW_TEMP = 3,
-  AIR_QUALITY = 4,
-  UV = 5,
-  WIND_SPEED = 6,
-  GUST = 7,
-  WIND_DIRECTION = 8,
-  SUNRISE = 9,
-  SUNSET = 10,
-  PRECIPITATION = 11,
-  VISIBILITY = 12,
-  HUMIDITY = 13,
-  PRESSURE = 14,
-  NUM_PROPERTIES = 15 // UPDATE to Latest Index
+  WIND_SPEED = 2,
+  WIND_DIRECTION = 3,
+  HUMIDITY = 4,
+  PRESSURE = 5,
+  VISIBILITY = 6,
+  UV = 7,
+  GUST_SPEED = 8,
+  PRECIPITATION = 9,
+  CLOUD = 10,
+  LAST_UPDATED = 11,
+  NUM_PROPERTIES = 12
 };
 
 class Weather {
-private:
-  Property *properties[NUM_PROPERTIES];
+  private:
+  Property* properties[NUM_PROPERTIES];
 
-public:
+  public:
   Weather();
   ~Weather();
-  void setProperty(PropertyIndex index, Property *property);
-  Property *getProperty(PropertyIndex index) const;
+  void setProperty(PropertyIndex index, Property* property);
+  Property* getProperty(PropertyIndex index) const;
 };
-
-
-
 
 #endif // WEATHER_H

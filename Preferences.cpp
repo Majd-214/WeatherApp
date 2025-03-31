@@ -8,18 +8,20 @@
 #include <sstream>
 
 Preferences::Preferences()
-    : location("Unknown"), units("Metric"), datamode("advanced") {}
+  : location("Unknown"), units("Metric"), datamode("advanced"), forecast("5") {
+}
 
-Preferences::Preferences(const string &location, const string &units,
-                         const string &datamode)
-    : location(location), units(units), datamode(datamode) {}
+Preferences::Preferences(const string &location,
+                         const string &units,
+                         const string &datamode,
+                         const string &forecast)
+  : location(location), units(units), datamode(datamode), forecast(forecast) {
+}
 
 bool Preferences::fileloading(const string &filename) {
   ifstream infile(filename);
 
-  if (!infile.is_open()) {
-    return false;
-  }
+  if (!infile.is_open()) return false;
 
   string line;
   while (getline(infile, line)) {
@@ -30,21 +32,12 @@ bool Preferences::fileloading(const string &filename) {
       string value;
 
       if (getline(linestream, value)) {
-        while (!value.empty() && (value[0] == ' ' || value[0] == '\n')) {
-          value.erase(0, 1);
-        }
+        while (!value.empty() && (value[0] == ' ' || value[0] == '\n')) value.erase(0, 1);
 
-        if (key == "location") {
-          location = value;
-        }
-
-        else if (key == "units") {
-          units = value;
-        }
-
-        else if (key == "datamode") {
-          datamode = value;
-        }
+        if (key == "location") location = value;
+        else if (key == "units") units = value;
+        else if (key == "datamode") datamode = value;
+        else if (key == "forecast") forecast = value;
       }
     }
   }
@@ -63,6 +56,7 @@ bool Preferences::filesaving(const string &filename) const {
   outfile << "Location: " << location << endl;
   outfile << "Units: " << units << endl;
   outfile << "Datamode: " << datamode << endl;
+  outfile << "Forecast: " << forecast << endl;
   outfile.close();
   return true;
 }

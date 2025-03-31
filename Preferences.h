@@ -13,10 +13,11 @@ public:
   string location;
   string units;
   string datamode;
+  string forecast;
 
   Preferences();
   Preferences(const string &location, const string &units,
-              const string &datamode);
+              const string &datamode, const string &forecast);
 
   bool fileloading(const string &filename);
   bool filesaving(const string &filename) const;
