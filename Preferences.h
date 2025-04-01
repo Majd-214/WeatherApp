@@ -3,31 +3,53 @@
 #define PREFERENCES_H
 
 #include <string>
-#include <fstream> // Added for friend declaration
+#include <fstream> // Keep for file operations if needed directly
+#include <vector>  // Keep if used
 
-using namespace std;
-
+// Class to manage user preferences, now fully encapsulated
 class Preferences {
-public:
-    string apiKey; // Added apiKey member
-    string location;
-    string units;
-    string datamode;
-    int forecastDays;
+  private:
+  std::string apiKey;
+  std::string location;
+  std::string units; // "Metric" or "Imperial"
+  std::string datamode; // Example: "basic", "advanced" (if used)
+  int forecastDays; // Number of days for forecast (e.g., 1-14)
+  std::string settingsFilename; // Store the filename
 
-    Preferences();
-    Preferences(const string &apiKey, const string &location, const string &units,
-                const string &datamode, int forecastDays);
+  // Private helpers
+  std::string trim(const std::string& str);
+  std::string toLower(const std::string& str);
+  void loadDefaults(); // Helper to set default values
 
-    // Made filenames const char* for broader compatibility, though string is fine too
-    bool loadSettings(const char *filename = "settings.txt");
-    bool saveSettings(const char *filename = "settings.txt") const;
+  public:
+  // Constructor uses a default filename
+  Preferences(const std::string& filename = "settings.txt");
 
-private:
-    // Helper to trim whitespace
-    string trim(const string& str);
-    // Helper to convert string to lower case for case-insensitive key matching
-    string toLower(const string& str);
+  // Prevent copying and assignment (or implement properly if needed)
+  Preferences(const Preferences&) = delete;
+  Preferences& operator=(const Preferences&) = delete;
+
+  // --- Getters ---
+  const std::string& getApiKey() const;
+  const std::string& getLocation() const;
+  const std::string& getUnits() const;
+  const std::string& getDataMode() const;
+  int getForecastDays() const;
+
+  // --- Setters (with validation where applicable) ---
+  void setApiKey(const std::string& key);
+  void setLocation(const std::string& loc);
+  // Returns true if unit was valid and set, false otherwise
+  bool setUnits(const std::string& unit);
+  void setDataMode(const std::string& mode);
+  // Returns true if days were valid and set, false otherwise
+  bool setForecastDays(int days);
+
+  // --- File Operations ---
+  // Load settings from the stored filename
+  bool loadSettings();
+  // Save settings to the stored filename
+  bool saveSettings() const;
 };
 
 #endif // PREFERENCES_H

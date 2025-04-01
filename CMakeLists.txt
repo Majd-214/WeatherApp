@@ -31,12 +31,17 @@ add_executable(WeatherApp
         Weather.h
         ApiConverter.cpp
         ApiConverter.h
-        Forecast.cpp
         Forecast.h
         Preferences.cpp
         Preferences.h
         Ui.cpp
         Ui.h
+        IDisplayable.h
+        WeatherReport.h
+        CurrentWeatherReport.cpp
+        CurrentWeatherReport.h
+        ForecastReport.cpp
+        ForecastReport.h
 )
 
 target_include_directories(WeatherApp PRIVATE ${cpp-httplib_SOURCE_DIR})

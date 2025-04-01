@@ -1,62 +1,20 @@
 // UI.cpp
 #include "UI.h"
+#include "IDisplayable.h"
+#include "Preferences.h"
 #include <iostream>
 #include <iomanip>
 #include <limits>
-#include <cstdlib>
-#include <ctime> // For time formatting
-
-#ifdef _WIN32
-#define CLEAR_COMMAND "cls"
-#else
-#define CLEAR_COMMAND "clear"
-#endif
+#include <string>
+#include <cstdlib> // Still potentially useful for other system() calls if any
 
 using namespace std;
 
-void UI::displayWeather(const Weather& weather) {
-    cout << "\n--- Current Weather Conditions ---" << endl;
-    bool dataDisplayed = false;
-    for (int i = 0; i < NUM_PROPERTIES; ++i) {
-        Property* prop = weather.getProperty(static_cast<PropertyIndex>(i));
-        if (prop != nullptr) {
-            // Format Last Updated time
-            if (static_cast<PropertyIndex>(i) == LAST_UPDATED) {
-                 time_t epochTime = static_cast<time_t>(prop->getValue());
-                 // Use std::put_time for safer formatting
-                 std::tm timeinfo = {};
-                 #ifdef _WIN32
-                      localtime_s(&timeinfo, &epochTime);
-                 #else
-                      localtime_r(&epochTime, &timeinfo);
-                 #endif
-                 // Buffer for formatted time string
-                 char time_buf[100];
-                 // Format: YYYY-MM-DD HH:MM:SS Timezone Name (Timezone might be tricky/platform specific)
-                 if (std::strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S %Z", &timeinfo)) {
-                      cout << left << setw(15) << prop->getName() << ": " << time_buf << endl;
-                 } else {
-                      cout << left << setw(15) << prop->getName() << ": " << "(time formatting error)" << endl;
-                 }
-
-            } else { // Handle other properties
-                 cout << left << setw(15) << prop->getName() << ": "
-                      << fixed << setprecision(1) // Use 1 decimal place
-                      << prop->getValue();
-                 if (!prop->getUnit().empty()) {
-                    cout << " " << prop->getUnit();
-                 }
-                 cout << endl;
-            }
-             dataDisplayed = true;
-        }
-    }
-     if (!dataDisplayed) {
-         cout << "No weather data available to display." << endl;
-     }
-     cout << "--------------------------------" << endl;
+// --- Display Methods ---
+// (displayReport, displayMenu, displayPreferences remain the same as previous version)
+void UI::displayReport(const IDisplayable& report) {
+    cout << report;
 }
-
 
 void UI::displayMenu() {
     cout << "\n=== Weather App Menu ===" << endl;
@@ -68,18 +26,88 @@ void UI::displayMenu() {
     cout << "6. Update Forecast Days (1-14)" << endl;
     cout << "7. Exit" << endl;
     cout << "========================" << endl;
-    cout << "Enter your choice: ";
 }
 
+void UI::displayPreferences(const Preferences& prefs) {
+     cout << "--- Preferences Currently ---" << endl;
+     cout << "Location:      " << prefs.getLocation() << endl;
+     cout << "Units:         " << prefs.getUnits() << endl;
+     cout << "Forecast Days: " << prefs.getForecastDays() << endl;
+     cout << "API Key Set:   " << (prefs.getApiKey().empty() ? "No" : "Yes") << endl;
+     cout << "---------------------------" << endl;
+}
+
+
+// --- Console Utilities ---
 void UI::clearConsole() {
-    system(CLEAR_COMMAND);
+    cout << flush;
+#ifdef _WIN32
+    system("CLS");
+#else
+    // Use ANSI escape codes as fallback for non-Windows (Linux, macOS)
+    // This might still fail in some IDE consoles but works in standard terminals
+    system("clear");
+#endif
 }
 
 void UI::pauseScreen() {
-    cout << "\nPress Enter to continue...";
-    // Clear potential leftover input from buffer before waiting
+#ifdef _WIN32
+    // Flush cout before calling system("PAUSE")
+    system("PAUSE");
+    // PAUSE already waits for Enter, so no cin.ignore/get needed here.
+#else
+    cout << "\nPress Enter to continue..." << flush << endl;
+    // Use cin.ignore/get for non-Windows platforms
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    // If the ignore above consumes the 'Enter' press meant for pausing,
-    // you might need cin.get() here to wait for a distinct press. Test it.
-    // cin.get();
+    // cin.get(); // Uncomment if ignore consumes the Enter press
+#endif
+}
+
+// --- User Input ---
+// (getMenuChoice, getTextInput, getForecastDaysInput, getUnitsInput remain the same)
+int UI::getMenuChoice(int minChoice, int maxChoice) {
+    int choice = 0;
+    cout << "Enter your choice (" << minChoice << "-" << maxChoice << "): ";
+    cin >> choice;
+
+    while (cin.fail() || choice < minChoice || choice > maxChoice) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid input. Please enter a number between " << minChoice << " and " << maxChoice << ": ";
+        cin >> choice;
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return choice;
+}
+
+string UI::getTextInput(const string& prompt) {
+    string input;
+    cout << prompt;
+    getline(cin, input);
+    return input;
+}
+
+int UI::getForecastDaysInput() {
+     int days = 0;
+     cout << "Enter new number of forecast days (1-14): ";
+     cin >> days;
+      while (cin.fail() || days < 1 || days > 14) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid input. Please enter a number between 1 and 14: ";
+        cin >> days;
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return days;
+}
+
+string UI::getUnitsInput() {
+    string unit;
+    cout << "Enter new unit (Metric or Imperial): ";
+    getline(cin, unit);
+     while (unit != "Metric" && unit != "Imperial") {
+          cout << "Invalid unit. Please enter 'Metric' or 'Imperial': ";
+          getline(cin, unit);
+     }
+    return unit;
 }

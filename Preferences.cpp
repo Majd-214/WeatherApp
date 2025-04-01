@@ -3,114 +3,146 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <algorithm> // for std::transform
-#include <cctype>    // for ::tolower
+#include <algorithm>
+#include <cctype>
+#include <stdexcept> // For exceptions if desired over bool returns
 
-// Helper function to convert string to lower case
-string Preferences::toLower(const string& str) {
-    string lowerStr = str;
-    std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
-    return lowerStr;
-}
-
-// Helper function to trim leading/trailing whitespace
-string Preferences::trim(const string& str) {
-    size_t first = str.find_first_not_of(" \t\n\r\f\v");
-    if (string::npos == first) {
-        return str;
+namespace { // Use anonymous namespace for internal linkage helpers
+    // Helper function to trim leading/trailing whitespace
+    std::string trimInternal(const std::string& str) {
+        size_t first = str.find_first_not_of(" \t\n\r\f\v");
+        if (std::string::npos == first) {
+            return str;
+        }
+        size_t last = str.find_last_not_of(" \t\n\r\f\v");
+        return str.substr(first, (last - first + 1));
     }
-    size_t last = str.find_last_not_of(" \t\n\r\f\v");
-    return str.substr(first, (last - first + 1));
+
+    // Helper function to convert string to lower case
+    std::string toLowerInternal(const std::string& str) {
+        std::string lowerStr = str;
+        std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
+                       [](unsigned char c){ return std::tolower(c); });
+        return lowerStr;
+    }
+} // anonymous namespace
+
+
+// --- Private Helpers ---
+std::string Preferences::trim(const std::string& str) { return trimInternal(str); }
+std::string Preferences::toLower(const std::string& str) { return toLowerInternal(str); }
+
+void Preferences::loadDefaults() {
+    apiKey = ""; // Default empty - requires user input or file
+    location = "London"; // Default location
+    units = "Metric"; // Default units
+    datamode = "advanced"; // Default mode
+    forecastDays = 3; // Default days
 }
 
+// --- Constructor ---
+Preferences::Preferences(const std::string& filename) : settingsFilename(filename) {
+    loadDefaults(); // Start with defaults
+    loadSettings(); // Try to load from file, potentially overwriting defaults
+}
 
-Preferences::Preferences()
-    : apiKey(""), location("London"), units("Metric"), datamode("advanced"), forecastDays(3) {} // Default values
+// --- Getters ---
+const std::string& Preferences::getApiKey() const { return apiKey; }
+const std::string& Preferences::getLocation() const { return location; }
+const std::string& Preferences::getUnits() const { return units; }
+const std::string& Preferences::getDataMode() const { return datamode; }
+int Preferences::getForecastDays() const { return forecastDays; }
 
-Preferences::Preferences(const string &key, const string &loc, const string &unit,
-                         const string &mode, int days)
-    : apiKey(key), location(loc), units(unit), datamode(mode), forecastDays(days) {}
+// --- Setters ---
+void Preferences::setApiKey(const std::string& key) { apiKey = key; } // No validation assumed needed here
+void Preferences::setLocation(const std::string& loc) { location = trim(loc); } // Trim location input
 
-bool Preferences::loadSettings(const char *filename) {
-    ifstream infile(filename);
+bool Preferences::setUnits(const std::string& unit) {
+    std::string trimmedUnit = trim(unit);
+    if (trimmedUnit == "Metric" || trimmedUnit == "Imperial") {
+        units = trimmedUnit;
+        return true;
+    }
+    std::cerr << "Warning: Invalid unit '" << unit << "' provided. Units remain '" << units << "'." << std::endl;
+    return false;
+}
 
+void Preferences::setDataMode(const std::string& mode) { datamode = trim(mode); }
+
+bool Preferences::setForecastDays(int days) {
+    if (days >= 1 && days <= 14) { // WeatherAPI typical limit
+        forecastDays = days;
+        return true;
+    }
+    std::cerr << "Warning: Invalid forecast days value '" << days << "'. Forecast days remain '" << forecastDays << "'." << std::endl;
+    return false;
+}
+
+// --- File Operations ---
+bool Preferences::loadSettings() {
+    std::ifstream infile(settingsFilename);
     if (!infile.is_open()) {
-        cerr << "Warning: Could not open settings file '" << filename << "'. Using default settings." << endl;
-        // Create a default settings file?
-        // saveSettings(filename); // Optionally create one if it doesn't exist
+        std::cerr << "Info: Could not open settings file '" << settingsFilename << "'. Using default/current settings." << std::endl;
+        // Optionally create a default file on first run if it doesn't exist?
+        // saveSettings();
         return false;
     }
 
-    string line;
+    std::string line;
+    bool loadedSomething = false;
     while (getline(infile, line)) {
-        istringstream linestream(line);
-        string key;
-
+        std::istringstream linestream(line);
+        std::string key;
         if (getline(linestream, key, ':')) {
-            string value;
-            // Read the rest of the line as the value
-            getline(linestream, value);
-            key = trim(key);
+            std::string value;
+            getline(linestream, value); // Read rest of line
+            std::string lowerKey = toLower(trim(key));
             value = trim(value);
-            string lowerKey = toLower(key); // Use lowercase for comparison
 
             if (value.empty()) continue; // Skip lines without values
 
-            // Standardize keys to lowercase for comparison
-            if (lowerKey == "apikey") {
-                apiKey = value;
-            } else if (lowerKey == "location") {
-                location = value;
-            } else if (lowerKey == "units") {
-                if (value == "Metric" || value == "Imperial") {
-                     units = value;
-                } else {
-                    cerr << "Warning: Invalid unit '" << value << "' in settings file. Using default '" << units << "'." << endl;
-                }
-            } else if (lowerKey == "datamode") {
-                datamode = value; // Assuming any string is valid for datamode for now
-            } else if (lowerKey == "forecastdays") {
+            if (lowerKey == "apikey") { setApiKey(value); loadedSomething = true; }
+            else if (lowerKey == "location") { setLocation(value); loadedSomething = true; }
+            else if (lowerKey == "units") { if(setUnits(value)) loadedSomething = true; }
+            else if (lowerKey == "datamode") { setDataMode(value); loadedSomething = true; }
+            else if (lowerKey == "forecastdays") {
                 try {
-                    int days = stoi(value);
-                    if (days >= 1 && days <= 14) { // Assuming 1-14 is the valid range
-                         forecastDays = days;
-                    } else {
-                         cerr << "Warning: Invalid forecast days value '" << value << "' in settings file. Using default '" << forecastDays << "'." << endl;
-                    }
-                } catch (const std::invalid_argument& ia) {
-                    cerr << "Warning: Invalid number format for forecastdays '" << value << "' in settings file. Using default '" << forecastDays << "'." << endl;
-                } catch (const std::out_of_range& oor) {
-                     cerr << "Warning: Forecastdays value '" << value << "' out of range in settings file. Using default '" << forecastDays << "'." << endl;
+                    int days = std::stoi(value);
+                    if(setForecastDays(days)) loadedSomething = true;
+                } catch (const std::invalid_argument&) {
+                    std::cerr << "Warning: Invalid number format for forecastdays '" << value << "' in settings file." << std::endl;
+                } catch (const std::out_of_range&) {
+                     std::cerr << "Warning: Forecastdays value '" << value << "' out of range in settings file." << std::endl;
                 }
             }
         }
     }
     infile.close();
-    cout << "Settings loaded successfully from '" << filename << "'" << endl;
-    return true;
+    if (loadedSomething) {
+        std::cout << "Settings loaded successfully from '" << settingsFilename << "'" << std::endl;
+    }
+    return true; // Return true even if file was just empty or only had warnings
 }
 
-bool Preferences::saveSettings(const char *filename) const {
-    ofstream outfile(filename);
-
+bool Preferences::saveSettings() const {
+    std::ofstream outfile(settingsFilename);
     if (!outfile.is_open()) {
-        cerr << "Error: Could not open settings file '" << filename << "' for saving." << endl;
+        std::cerr << "Error: Could not open settings file '" << settingsFilename << "' for saving." << std::endl;
         return false;
     }
 
-    // Use consistent lowercase keys for saving
-    outfile << "apikey:" << apiKey << endl;
-    outfile << "location:" << location << endl;
-    outfile << "units:" << units << endl;
-    outfile << "datamode:" << datamode << endl;
-    outfile << "forecastdays:" << forecastDays << endl;
+    outfile << "apikey:" << apiKey << std::endl;
+    outfile << "location:" << location << std::endl;
+    outfile << "units:" << units << std::endl;
+    outfile << "datamode:" << datamode << std::endl;
+    outfile << "forecastdays:" << forecastDays << std::endl;
 
     outfile.close();
 
-    if (!outfile) { // Check if any errors occurred during close/write
-         cerr << "Error: Failed to write all data to settings file '" << filename << "'." << endl;
+    if (!outfile) { // Check stream state after closing
+         std::cerr << "Error: Failed to write all data to settings file '" << settingsFilename << "'." << std::endl;
          return false;
     }
-    cout << "Settings saved successfully to '" << filename << "'" << endl;
+    std::cout << "Settings saved successfully to '" << settingsFilename << "'" << std::endl;
     return true;
 }

@@ -2,51 +2,48 @@
 #ifndef WEATHER_H
 #define WEATHER_H
 
-#include "Property.h" // Included for Property definition
-#include <stdexcept> // For std::runtime_error in assignment operator
+#include "Property.h" // For Property definition
+#include <vector>     // Include vector as it might be used internally later
+#include <ostream>    // For display helper parameter type
+#include <map>        // Could use map instead of array for properties
+#include <memory>     // For potential future use of smart pointers
 
-// Keep the enum definition
+// PropertyIndex enum remains useful for direct access if needed
+// Could be replaced if switching to std::map<string, Property*>
 enum PropertyIndex {
-    TEMPERATURE = 0,
-    FEELS_LIKE = 1,
-    WIND_SPEED = 2,
-    WIND_DIRECTION = 3,
-    HUMIDITY = 4,
-    PRESSURE = 5,
-    VISIBILITY = 6,
-    UV = 7,
-    GUST_SPEED = 8,
-    PRECIPITATION = 9,
-    CLOUD = 10,
-    LAST_UPDATED = 11, // Keep epoch time property
-    NUM_PROPERTIES = 12 // Number of properties
+    TEMPERATURE = 0, FEELS_LIKE, WIND_SPEED, WIND_DIRECTION, HUMIDITY,
+    PRESSURE, VISIBILITY, UV, GUST_SPEED, PRECIPITATION, CLOUD, LAST_UPDATED,
+    NUM_PROPERTIES // Size indicator
   };
 
-
+// Represents weather conditions at a specific point in time
 class Weather {
-private:
+    private:
+    // Using an array still, ensure NUM_PROPERTIES is accurate
     Property* properties[NUM_PROPERTIES];
 
-    // Helper to copy properties (used in copy constructor and assignment)
+    // Private helpers for copy control (Rule of Three)
     void copyProperties(const Weather& other);
-    // Helper to delete properties (used in destructor and assignment)
     void deleteProperties();
 
+    public:
+    Weather();
+    ~Weather();
 
-public:
-    Weather(); // Default constructor
-    ~Weather(); // Destructor
+    // Rule of Three (Deep Copy Implementation)
+    Weather(const Weather& other);
+    Weather& operator=(const Weather& other);
 
-    // --- Rule of Three ---
-    Weather(const Weather& other); // Copy constructor (declaration)
-    Weather& operator=(const Weather& other); // Copy assignment operator (declaration)
-
-    // --- Rule of Five (Optional but good practice if move semantics were needed) ---
-    // Weather(Weather&& other) noexcept; // Move constructor
-    // Weather& operator=(Weather&& other) noexcept; // Move assignment operator
-
+    // --- Property Management ---
+    // Sets property, taking ownership of the pointer if index is valid.
+    // Deletes existing property at that index first.
     void setProperty(PropertyIndex index, Property* property);
+    // Returns raw pointer, caller does NOT own it. Returns nullptr if index invalid.
     Property* getProperty(PropertyIndex index) const;
+
+    // --- Helper for Display ---
+    // Non-virtual display helper to be called by report classes
+    void displayData(std::ostream& os) const;
 };
 
 #endif // WEATHER_H

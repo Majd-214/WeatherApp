@@ -2,4 +2,4 @@ apikey:e2cf72779019414bab7195316251003
 location:Hamilton, Ontario, Canada
 units:Imperial
 datamode:Advanced
-forecastdays:4
+forecastdays:3
