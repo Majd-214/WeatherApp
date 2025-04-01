@@ -2,41 +2,51 @@
 #ifndef WEATHER_UI_H
 #define WEATHER_UI_H
 
-#include <iostream> // For std::ostream potentially
-#include <string>   // For user input
+#include <string>   // For prompt strings and input/output
 
-// Forward declare interfaces/classes used
-class IDisplayable;
-class Preferences;
+// Forward declarations of classes used by UI functions (reduces header dependencies).
+class IDisplayable; // Interface for objects that can be displayed.
+class Preferences;  // Class holding application settings.
 
-// Static class for handling User Interface elements
+// Provides static methods for handling console-based User Interface interactions.
+// Designed as a utility class (no instances needed).
 class UI {
     public:
-    // Prevent instantiation
+    // Delete constructor to prevent instantiation of this utility class.
     UI() = delete;
 
     // --- Display Methods ---
-    // Displays any object implementing IDisplayable (polymorphic)
+
+    // Displays any object that conforms to the IDisplayable interface.
+    // Uses polymorphism to call the correct display() method.
     static void displayReport(const IDisplayable& report);
 
-    // Displays the main menu options
+    // Displays the main application menu to the console.
     static void displayMenu();
 
-    // Displays current preference settings
+    // Displays the current settings stored in the Preferences object.
     static void displayPreferences(const Preferences& prefs);
 
-    // --- Console Utilities ---
+    // --- Console Utility Methods ---
+
+    // Clears the console screen (platform-dependent implementation).
     static void clearConsole();
+
+    // Pauses execution and waits for the user to press Enter (platform-dependent).
     static void pauseScreen();
 
-    // --- User Input ---
-    // Gets a validated integer choice from the user
+    // --- User Input Methods ---
+
+    // Prompts the user and gets a validated integer choice within a specified range.
     static int getMenuChoice(int minChoice, int maxChoice);
-    // Gets a line of text input
+
+    // Prompts the user and gets a line of text input.
     static std::string getTextInput(const std::string& prompt);
-    // Gets validated forecast days input
+
+    // Prompts the user and gets a validated integer for forecast days (1-14).
     static int getForecastDaysInput();
-    // Gets validated units input
+
+    // Prompts the user and gets validated units input ("Metric" or "Imperial").
     static std::string getUnitsInput();
 };
 

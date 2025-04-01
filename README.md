@@ -1,122 +1,81 @@
-# Console Based Weather Application
+# Console Weather Application
 
 ## Overview
 
-This project is a console-based weather application developed in C++ as part of an object-oriented programming assignment. The application aims to provide users with current weather information and a simple forecast for a specified location. It demonstrates various C++ language features and object-oriented programming principles.
+This C++ console application fetches and displays current weather conditions and multi-day forecasts using the WeatherAPI.com service. It demonstrates object-oriented principles, including abstraction, inheritance, polymorphism, and resource management (RAII with `std::unique_ptr`).
 
 ## Features
 
-* **Current Weather Display:** Shows the current temperature, humidity, UV index, and potentially other weather properties.
-* **Simple Forecast:** Provides a basic forecast, including temperature and conditions.
-* **User Location Input:** Reads the user's location from a file.
-* **User Settings:** Reads user preferences (like temperature units) from a file.
-* **Data Retrieval:** Fetches weather data from an external API (implementation details would be in the source code).
-* **Object-Oriented Design:** Utilizes classes, inheritance, polymorphism, and encapsulation.
+* **Current Weather:** Displays detailed current conditions (temperature, feels like, wind, humidity, pressure, visibility, precipitation, etc.).
+* **Forecast:** Provides daily summary forecasts and detailed hourly forecasts for a configurable number of days (1-14).
+* **Configurable Settings:**
+    * API Key management (prompts user if missing).
+    * Location setting (accepts city name, zip code, lat/lon).
+    * Unit selection (Metric/Imperial).
+    * Number of forecast days.
+* **Persistence:** Saves and loads settings (API Key, Location, Units, Forecast Days) to/from a `settings.txt` file.
+* **User-Friendly Interface:** Simple console menu for navigation and interaction.
+* **External Libraries:** Uses `httplib` for HTTP requests and `nlohmann/json` for parsing API responses. (These libraries need to be available during compilation/linking).
 
-## Class Structure
+## Core Class Structure
 
-The application is structured using the following classes and structs:
+* **`main.cpp`**: Entry point, main application loop, orchestrates UI, Preferences, and API calls.
+* **`UI` (Static Class)**: Handles all console input and output, including menus, prompts, and report display.
+* **`Preferences`**: Manages loading, saving, and accessing user settings (location, units, API key, etc.) from `settings.txt`.
+* **`APIConverter`**: Interfaces with the WeatherAPI. Constructs requests, performs HTTP calls (using `httplib`), parses JSON responses (using `nlohmann/json`), and converts data into `Weather` and `Forecast` objects. Creates report objects.
+* **`Weather`**: Container class holding various weather `Property` objects for a specific time or summary period. Manages `Property` object lifetimes.
+* **`Property`**: Represents a single weather data point (e.g., Temperature) with its name, value, and unit.
+* **`Forecast`**: Container holding `DailyForecast` objects.
+* **`DailyForecast`**: Represents one day's forecast, containing a summary `Weather` object and a vector of `HourlyForecast` objects.
+* **`HourlyForecast`**: Represents one hour's forecast, containing a `Weather` object and a time string.
+* **`IDisplayable` (Interface)**: Abstract base class defining the `display(ostream&)` contract.
+* **`WeatherReport` (Abstract Class)**: Abstract base for reports, inheriting `IDisplayable` and adding `getReportType()`.
+* **`CurrentWeatherReport`**: Concrete report class holding `Weather` data for current conditions. Implements `display`.
+* **`ForecastReport`**: Concrete report class holding `Forecast` data. Implements `display` to show either daily or hourly details based on configuration.
 
-* **`Weather` Class:**
-    * Manages an array of `Properties`.
-    * Holds a pointer to a `Forecast`.
-    * Responsible for storing overall weather information.
-* **Abstract Class `Properties`:**
-    * Base class for different weather properties.
-    * Defines virtual methods for getting the value, unit, and predicting the property.
-* **Derived Classes (inheriting from `Properties`):**
-    * `Temperature`: Stores temperature value and unit (Celsius or Fahrenheit).
-    * `Humidity`: Stores humidity value (in percentage).
-    * `UV`: Stores UV index value.
-* **`Wind` Struct:**
-    * Holds wind speed, unit (km/h or mph), and direction.
-* **`Forecast` Struct:**
-    * Stores forecast temperature and conditions.
-* **`APIConverter` Class:**
-    * Responsible for fetching weather data from an API and converting it into a `Weather` object.
-* **`UserInterface` Class:**
-    * Handles user interaction through the console.
-    * Displays weather information.
-    * Reads user location and settings from files.
-* **`WeatherPrediction` Class:**
-    * Provides a basic weather forecast based on the current weather data, utilizing polymorphism through the `predict()` method in the `Properties` hierarchy.
+## Key OOP Concepts Demonstrated
 
-## OOP Concepts Used
+* **Abstraction:** `IDisplayable` and `WeatherReport` define interfaces and abstract concepts.
+* **Encapsulation:** Classes manage their own data (`Preferences`, `Weather`, `Property`). Internal details of API calls are hidden within `APIConverter`.
+* **Inheritance:** `WeatherReport` inherits from `IDisplayable`. `CurrentWeatherReport` and `ForecastReport` inherit from `WeatherReport`.
+* **Polymorphism:** The `UI::displayReport` function uses an `IDisplayable&` reference, allowing it to display any concrete `WeatherReport` type through virtual function calls (`display`).
+* **Composition/Aggregation:** `Weather` holds `Property` objects. `Forecast` holds `DailyForecast` objects, which hold `HourlyForecast` and `Weather` objects. `APIConverter` uses an `httplib::Client`.
+* **RAII (Resource Acquisition Is Initialization):** `std::unique_ptr` is used in `APIConverter` to manage the `httplib::Client` lifetime. `Weather` manages the lifetime of `Property` pointers through constructors/destructor/copy-assignment (Rule of Three). Report objects are managed by `std::unique_ptr` in `main`.
 
-* **Classes:** The core building blocks of the application, used to model weather data, API interaction, user interface, and prediction logic.
-* **Abstract Class:** The `Properties` class serves as an abstract base class, defining a common interface for all weather-related properties.
-* **Inheritance:** The `Temperature`, `Humidity`, and `UV` classes inherit from the `Properties` class, demonstrating specialization and code reuse.
-* **Polymorphism:** The `WeatherPrediction` class utilizes the virtual `predict()` method in the `Properties` hierarchy to perform different prediction logic based on the specific type of weather property.
-* **Encapsulation:** Each class manages its own data and provides controlled access through public methods, ensuring data integrity.
-* **Aggregation:** The `Weather` class aggregates multiple `Properties` objects.
+## Dependencies
 
-## File I/O
-
-The application utilizes file input/output for the following:
-
-* **User Location:** The `UserInterface` reads the user's location from a file.
-* **User Settings:** The `UserInterface` reads user preferences, such as the preferred temperature unit, from a file.
+* A C++11 compliant compiler (or later).
+* **cpp-httplib:** A header-only cross-platform HTTP/HTTPS library. You need to download `httplib.h` and place it where your compiler can find it (e.g., in the project directory or an include path). Get it from [https://github.com/yhirose/cpp-httplib](https://github.com/yhirose/cpp-httplib).
+* **JSON for Modern C++:** A header-only JSON library by Niels Lohmann. You need `json.hpp`. It's often placed within a `nlohmann` directory. Get it from [https://github.com/nlohmann/json](https://github.com/nlohmann/json).
 
 ## How to Build and Run
 
-Instructions on how to compile and run the application will be provided here (assuming a standard C++ development environment):
-
-1.  **Prerequisites:** Ensure you have a C++ compiler (like g++) installed on your system.
-
-2.  **Compilation:** Navigate to the project directory in your terminal and use the compiler to compile the source code files (e.g., `g++ main.cpp weather.cpp api_converter.cpp user_interface.cpp weather_prediction.cpp -o weatherapp`).
-
-3.  **Running:** Execute the compiled application (e.g., `./weatherapp`).
-
-4.  **Input Files:** Make sure you have the necessary input files (for location and settings) in the same directory as the executable or provide the correct file paths.
-
-## Deliverables
-
-This project fulfills the requirements for the C++ project assignment, including:
-
-* A project proposal (submitted separately).
-* Well-commented source code.
-* A video recording of the project presentation.
-* A project report (as per the provided template).
-* A zip folder containing the project's source code.
-* A project presentation.
+1.  **Get Dependencies:** Download `httplib.h` and `nlohmann/json.hpp`.
+2.  **Arrange Files:** Place `httplib.h` and the `nlohmann` directory (containing `json.hpp`) alongside your source files (`.cpp`, `.h`) or in a location specified by your compiler's include path.
+3.  **Compile:** Use a C++ compiler (like g++ or clang++). You need to link necessary libraries if `httplib` requires them (e.g., OpenSSL for HTTPS, pthreads). A simple compilation command might look like:
+    ```bash
+    g++ main.cpp UI.cpp Preferences.cpp APIConverter.cpp Weather.cpp Property.cpp CurrentWeatherReport.cpp ForecastReport.cpp WeatherReport.cpp -o weather_app -std=c++11 -pthread -lssl -lcrypto
+    ```
+    *(Note: The exact libraries `-lssl -lcrypto` might vary based on your system and how `httplib` was configured/built if not purely header-only for HTTPS).*
+4.  **API Key:** Run the application. If `settings.txt` doesn't exist or lacks an API key, you will be prompted to enter one. Get a free API key from [WeatherAPI.com](https://www.weatherapi.com/).
+5.  **Run:** Execute the compiled application:
+    ```bash
+    ./weather_app
+    ```
+6.  **Settings File (`settings.txt`):** The application will create/use a `settings.txt` file in the same directory to store your preferences:
+    ```
+    apikey:YOUR_API_KEY_HERE
+    location:London
+    units:Metric
+    datamode:advanced
+    forecastdays:3
+    ```
 
 ## Further Improvements
 
-Potential future enhancements could include:
-
-* More detailed weather information (e.g., wind speed, pressure).
-* Hourly and daily forecasts.
-* Error handling for API calls and file operations.
-* More sophisticated prediction algorithms.
-* A more user-friendly console interface.
-
-## Group Members
-
-* Majd Aburas - 400509985
-* Joshua Kam - 400572866
-* Ryan Chung - 400577912
-* Vipra Checkera 400594097
-
-## Project Title
-
-Console Based Weather Application
-
-## Problem Description
-
-This console application provides users with current weather information and a simple forecast for a given location. It aims to demonstrate object-oriented programming principles in C++ and fulfill the requirements of the course project.
-
-## C++ Concepts Used
-
-* Pointers
-* Concrete and abstract classes
-* Overloaded functions and constructors (implementation details in source code)
-* Inheritance
-* Polymorphism
-* File I/O
-* Dynamic arrays (using pointers)
-
-## Key Functions and Classes Description
-
-*(Refer to the descriptions provided earlier for `predict`, `convertToWeather`, and `displayWeather`)*
-
-This README provides a comprehensive overview of the Console Based Weather Application project. For detailed implementation, please refer to the well-commented source code.
+* Implement Move Semantics (Rule of Five) for `Weather`, `DailyForecast`, `HourlyForecast` for potentially better performance.
+* More robust error handling for API responses and network issues.
+* Add input validation for location strings.
+* Refine the display formatting.
+* Integrate unit testing.
+* Consider using a build system like CMake to manage dependencies and compilation.

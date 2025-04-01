@@ -2,20 +2,23 @@
 #ifndef IDISPLAYABLE_H
 #define IDISPLAYABLE_H
 
-#include <ostream>
+#include <ostream> // For std::ostream
 
-// Interface for objects that can be displayed to an output stream
+// Abstract interface for classes that can display themselves to an output stream.
 class IDisplayable {
   public:
-  // Virtual destructor is crucial for base classes with virtual functions
+  // Virtual destructor is essential for proper cleanup in inheritance hierarchies.
   virtual ~IDisplayable() = default;
 
-  // Pure virtual function makes this class abstract (an interface)
+  // Pure virtual function: concrete derived classes MUST implement this method.
+  // Defines the contract for how an object should display itself.
   virtual void display(std::ostream& os) const = 0;
 
-  // Overload operator<< to use the display method polymorphically
+  // Friend function overload for the << operator.
+  // Allows objects implementing IDisplayable to be directly used with output streams
+  // (e.g., std::cout << myDisplayableObject;), invoking the virtual display() method.
   friend std::ostream& operator<<(std::ostream& os, const IDisplayable& disp) {
-    disp.display(os);
+    disp.display(os); // Polymorphic call to the object's specific display method
     return os;
   }
 };

@@ -1,123 +1,125 @@
-// main.cpp
-#include "Preferences.h"       // For managing settings
-#include "APIConverter.h"      // For fetching data
-#include "UI.h"                // For user interaction
-#include "WeatherReport.h"     // For report base class
-#include "CurrentWeatherReport.h" // For specific report types
-#include "ForecastReport.h"
-#include "IDisplayable.h"      // For the display interface
+// main.cpp - Main entry point for the Weather Application
+#include "Preferences.h"       // Manages user settings (API key, location, units)
+#include "APIConverter.h"      // Handles communication with the weather API
+#include "UI.h"                // Provides console user interface functions
+#include "WeatherReport.h"     // Abstract base class for reports
+#include "CurrentWeatherReport.h" // Concrete report for current weather
+#include "ForecastReport.h"    // Concrete report for forecast weather
+#include "IDisplayable.h"      // Interface for displayable objects (used by UI)
 
-#include <iostream>
-#include <memory> // For std::unique_ptr
-#include <string>
+#include <iostream> // For console input/output (cout, cerr)
+#include <memory>   // For std::unique_ptr (manages report objects)
+#include <string>   // For string manipulation
 
 int main() {
-    // --- Initialization ---
-    Preferences prefs; // Loads settings automatically in constructor
+    // --- Initialization Phase ---
+    Preferences prefs; // Loads settings from "settings.txt" or uses defaults.
 
-    // Ensure API key exists
+    // Ensure the API key is present, prompt user if missing.
     if (prefs.getApiKey().empty()) {
-        std::cout << "API Key not found or is empty in settings.txt." << std::endl;
+        std::cout << "API Key not found or empty in settings.txt." << std::endl;
         std::string key = UI::getTextInput("Please enter your WeatherAPI key: ");
         if (key.empty()) {
             std::cerr << "Error: API Key is required. Exiting." << std::endl;
-            return 1;
+            return 1; // Indicate failure
         }
-        prefs.setApiKey(key);
-        prefs.saveSettings(); // Save the entered key
+        prefs.setApiKey(key); // Store the entered key
+        prefs.saveSettings(); // Attempt to save it back to the file
     }
 
-    // Create API Converter
-    APIConverter apiConverter; // Uses default base URL
-    apiConverter.setApiKey(prefs.getApiKey()); // Set initial config
+    // Create the API converter instance and configure it from preferences.
+    APIConverter apiConverter; // Uses default WeatherAPI base URL
+    apiConverter.setApiKey(prefs.getApiKey());
     apiConverter.setLocation(prefs.getLocation());
     apiConverter.setUnits(prefs.getUnits());
 
     // --- Main Application Loop ---
     int choice = 0;
-    const int EXIT_CHOICE = 7;
+    const int EXIT_CHOICE = 7; // Define the exit menu option number
 
     do {
-        UI::clearConsole();
+        UI::clearConsole();          // Clear the screen for a fresh display
         UI::displayPreferences(prefs); // Show current settings
-        UI::displayMenu();            // Show menu options
-        choice = UI::getMenuChoice(1, EXIT_CHOICE); // Get validated choice
-        std::unique_ptr<WeatherReport> report = nullptr; // Smart pointer for reports
+        UI::displayMenu();            // Show the main menu
+        choice = UI::getMenuChoice(1, EXIT_CHOICE); // Get valid user input
 
+        // Use a smart pointer to manage the dynamically created report object.
+        std::unique_ptr<WeatherReport> report = nullptr;
+
+        // Process the user's menu choice.
         switch (choice) {
-            case 1: { // Get Current Weather
+            case 1: // Get Current Weather
                 std::cout << "\nFetching Current Weather..." << std::endl;
-                // APIConverter now returns the report directly
-                report = apiConverter.getCurrentWeather();
+                report = apiConverter.getCurrentWeather(); // Fetch and store report
                 break;
-            }
-            case 2: { // Get Hourly Forecast
+
+            case 2: // Get Hourly Forecast
                 std::cout << "\nFetching Hourly Forecast..." << std::endl;
                 report = apiConverter.getForecastReport(prefs.getForecastDays(), ForecastReport::DetailLevel::HOURLY);
                 break;
-            }
-            case 3: { // Get Daily Forecast
+
+            case 3: // Get Daily Forecast
                 std::cout << "\nFetching Daily Forecast Summary..." << std::endl;
                  report = apiConverter.getForecastReport(prefs.getForecastDays(), ForecastReport::DetailLevel::DAILY);
                 break;
-            }
-            case 4: { // Update Location
-                std::string newLocation = UI::getTextInput("Enter new location: ");
+
+            case 4: // Update Location
+                std::string newLocation = UI::getTextInput("Enter new location (e.g., City, zip, lat,lon): ");
                 if (!newLocation.empty()) {
-                    prefs.setLocation(newLocation);
-                    apiConverter.setLocation(newLocation); // Update converter too
-                    if (prefs.saveSettings()) {
-                        std::cout << "Location updated and saved." << std::endl;
-                    } else { std::cout << "Location updated for session, but failed to save." << std::endl; }
-                } else { std::cout << "Location not changed (input was empty)." << std::endl; }
-                UI::pauseScreen();
-                continue; // Skip report display for this option
-            }
-            case 5: { // Update Units
-                 std::string newUnits = UI::getUnitsInput(); // Gets validated input
-                 if (prefs.setUnits(newUnits)) { // Use setter validation
-                      apiConverter.setUnits(newUnits); // Update converter too
-                      if (prefs.saveSettings()) {
-                           std::cout << "Units updated and saved." << std::endl;
-                      } else { std::cout << "Units updated for session, but failed to save." << std::endl; }
-                 } // Setter already prints warning if invalid
+                    prefs.setLocation(newLocation);       // Update preferences object
+                    apiConverter.setLocation(newLocation); // Update API converter state
+                    std::cout << (prefs.saveSettings() ? "Location updated and saved." : "Location updated for session, but failed to save.") << std::endl;
+                } else {
+                    std::cout << "Location not changed (input was empty)." << std::endl;
+                }
+                UI::pauseScreen(); // Wait for user before continuing loop
+                continue; // Skip report display for this iteration
+
+            case 5: // Update Units
+                 std::string newUnits = UI::getUnitsInput(); // Get validated "Metric" or "Imperial"
+                 if (prefs.setUnits(newUnits)) { // Update prefs (validated)
+                      apiConverter.setUnits(newUnits); // Update API converter state
+                      std::cout << (prefs.saveSettings() ? "Units updated and saved." : "Units updated for session, but failed to save.") << std::endl;
+                 } // else: setUnits already printed a warning
                  UI::pauseScreen();
                  continue; // Skip report display
-            }
-             case 6: { // Update Forecast Days
-                int newDays = UI::getForecastDaysInput(); // Gets validated input
-                if (prefs.setForecastDays(newDays)) { // Use setter validation
-                    // No need to update apiConverter unless getForecast uses it differently
-                    if (prefs.saveSettings()) {
-                        std::cout << "Forecast days updated and saved." << std::endl;
-                    } else { std::cout << "Forecast days updated for session, but failed to save." << std::endl; }
-                } // Setter already prints warning if invalid
+
+             case 6: // Update Forecast Days
+                int newDays = UI::getForecastDaysInput(); // Get validated 1-14
+                if (prefs.setForecastDays(newDays)) { // Update prefs (validated)
+                    // No direct update needed for apiConverter here, it reads days on request
+                    std::cout << (prefs.saveSettings() ? "Forecast days updated and saved." : "Forecast days updated for session, but failed to save.") << std::endl;
+                } // else: setForecastDays already printed a warning
                  UI::pauseScreen();
                  continue; // Skip report display
-            }
-            case EXIT_CHOICE: {
+
+            case EXIT_CHOICE: // Exit
                 std::cout << "Exiting Weather App..." << std::endl;
-                continue; // Exit loop
-            }
-            default: { // Should not happen with getMenuChoice validation
+                continue; // Proceed to loop termination condition
+
+            default: // Should not happen due to getMenuChoice validation
                 std::cerr << "Error: Invalid menu choice detected." << std::endl;
                  UI::pauseScreen();
                  continue;
-            }
         } // End switch
 
-        // --- Display Report (if one was generated) ---
+        // --- Display Report (if a report was generated) ---
         if (report) {
-             // Polymorphic display using the IDisplayable interface
+             // Use the UI's display method, which leverages the IDisplayable interface
+             // for polymorphic display of the specific report type.
             UI::displayReport(*report);
-        } else {
-             // API call failed, error messages should have been printed by APIConverter
+        } else if (choice != EXIT_CHOICE) {
+             // If no report was generated (API call likely failed) and not exiting.
              std::cout << "\n*** Failed to retrieve or process the requested weather data. ***" << std::endl;
              std::cout << "*** Please check API Key, Location, and network connection. ***" << std::endl;
         }
-         UI::pauseScreen(); // Pause after displaying report or failure message
 
-    } while (choice != EXIT_CHOICE);
+        // Pause before looping back to the menu (unless exiting).
+        if (choice != EXIT_CHOICE) {
+             UI::pauseScreen();
+        }
 
-    return 0;
+    } while (choice != EXIT_CHOICE); // Loop continues until user chooses to exit
+
+    return 0; // Indicate successful execution
 }

@@ -1,53 +1,56 @@
-// APIConverter.h
+// ApiConverter.h
 #ifndef APICONVERTER_H
 #define APICONVERTER_H
 
 #include <string>
 #include <memory> // For std::unique_ptr
 
-#include "ForecastReport.h"
-
-// Forward declarations to reduce header dependencies
-class Weather;
-class Forecast;
+// Forward declarations to minimize header dependencies
+#include "ForecastReport.h" // Needed for DetailLevel enum definition
+namespace httplib { class Client; } // Forward declare external library class
 class CurrentWeatherReport;
-class ForecastReport;
-namespace httplib { class Client; } // Forward declare library class
+// class ForecastReport; // Already included for DetailLevel
 
-// Converts API responses into WeatherReport objects
+// Handles interaction with the weather API, fetching data and converting it
+// into report objects (CurrentWeatherReport, ForecastReport).
 class APIConverter {
-    private:
-    // Using unique_ptr for composition/ownership of the client
+private:
+    // Manages the HTTP client connection using a smart pointer.
     std::unique_ptr<httplib::Client> client;
+    // API key for authentication.
     std::string apiKey;
+    // Target location for weather data (e.g., "City", "lat,lon").
     std::string location;
-    std::string units; // "Metric" or "Imperial"
+    // Units for retrieved data ("Metric" or "Imperial").
+    std::string units;
 
-    public:
-    // Constructor now takes client details (e.g., base URL)
+public:
+    // Constructor: Initializes the HTTP client with the base API URL.
     explicit APIConverter(const std::string& apiBaseUrl = "http://api.weatherapi.com");
-    ~APIConverter(); // Needed because of unique_ptr to incomplete type in header
+    // Destructor: Necessary for proper cleanup of the unique_ptr.
+    ~APIConverter();
 
-    // Prevent copying - managing resources like http client
+    // Disable copy operations to prevent issues with resource management (client).
     APIConverter(const APIConverter&) = delete;
     APIConverter& operator=(const APIConverter&) = delete;
 
-    // --- Configuration ---
+    // --- Configuration Methods ---
+
+    // Sets the API key required for requests.
     void setApiKey(const std::string& key);
+    // Sets the location for which to fetch weather data.
     void setLocation(const std::string& loc);
-    // Returns true if unit was valid and set, false otherwise
+    // Sets the desired units ("Metric" or "Imperial"). Returns false if invalid.
     bool setUnits(const std::string& unit);
 
-    // --- Getters (Optional - consider if needed externally) ---
-    // const std::string& getApiKey() const;
-    // const std::string& getLocation() const;
-    // const std::string& getUnits() const;
+    // --- API Interaction Methods ---
 
-    // --- API Interaction ---
-    // Fetches current weather, returns a report object (or nullptr on failure)
+    // Fetches current weather data from the API.
+    // Returns a unique_ptr to a CurrentWeatherReport, or nullptr on failure.
     std::unique_ptr<CurrentWeatherReport> getCurrentWeather();
 
-    // Fetches forecast, returns a report object (or nullptr on failure)
+    // Fetches forecast data (daily/hourly) from the API for a specified number of days.
+    // Returns a unique_ptr to a ForecastReport, or nullptr on failure.
     std::unique_ptr<ForecastReport> getForecastReport(int days, ForecastReport::DetailLevel detail);
 };
 

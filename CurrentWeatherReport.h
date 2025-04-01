@@ -2,24 +2,33 @@
 #ifndef CURRENTWEATHERREPORT_H
 #define CURRENTWEATHERREPORT_H
 
-#include "WeatherReport.h"
-#include "Weather.h" // Include Weather definition
-#include <memory> // For std::unique_ptr or std::move
+#include "WeatherReport.h" // Base class interface
+#include "Weather.h"       // Contains the actual weather data structure
 
-// Represents a report containing current weather conditions
+#include <string>    // For getReportType return
+#include <ostream>   // For display method parameter
+
+// Concrete report class representing current weather conditions.
+// Inherits from WeatherReport and thus IDisplayable.
 class CurrentWeatherReport : public WeatherReport {
   private:
-  Weather currentConditions; // Contains the actual weather data
+  // Holds the weather data specific to the current conditions.
+  Weather currentConditions;
 
   public:
-  // Constructor takes a Weather object (moves or copies)
+  // Constructor: Takes ownership of the provided Weather data via move.
   explicit CurrentWeatherReport(Weather conditions);
 
-  // Override virtual functions from WeatherReport / IDisplayable
+  // --- Overridden Virtual Methods ---
+
+  // Returns the specific type identifier for this report.
   std::string getReportType() const override;
+  // Implements the display logic for current weather using the contained Weather object.
   void display(std::ostream& os) const override;
 
-  // Specific getter for this report type
+  // --- Specific Getter ---
+
+  // Provides read-only access to the underlying Weather data.
   const Weather& getWeather() const;
 };
 

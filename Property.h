@@ -1,38 +1,37 @@
-//
-// Created by aburasm on 2025-03-19.
-//
-
+// Property.h
 #ifndef PROPERTY_H
 #define PROPERTY_H
 
-#include <iostream>
-#include <string>
+#include <iostream> // For friend ostream operator
+#include <string>   // For name and unit strings
 
-using namespace std;
-
+// Represents a single weather property (like temperature, humidity) with its value and unit.
 class Property {
-protected:
- double value;
- string unit, name;
+ // Use private for encapsulation, grant access via public methods.
+ private:
+ std::string name;  // Descriptive name of the property (e.g., "Temperature").
+ double value;      // Numerical value of the property.
+ std::string unit;  // Unit of measurement (e.g., "°C", "%", "km/h").
 
-public:
+ public:
+ // Default constructor: Initializes with placeholder values.
  Property();
 
- Property(string name, double value, string unit);
+ // Parameterized constructor: Initializes with specific name, value, and unit.
+ Property(const std::string& name, double value, const std::string& unit);
 
- string getName() const;
-
+ // --- Getters (Provide read-only access) ---
+ std::string getName() const;
  double getValue() const;
+ std::string getUnit() const;
 
- string getUnit() const;
-
- void setName(string name);
-
+ // --- Setters (Allow modification) ---
+ void setName(const std::string& name);
  void setValue(double value);
+ void setUnit(const std::string& unit);
 
- void setUnit(string unit);
-
- friend ostream &operator<<(ostream &os, const Property &property);
+ // Friend function to allow direct printing of Property objects using std::cout.
+ friend std::ostream& operator<<(std::ostream& os, const Property& prop);
 };
 
-#endif  // PROPERTY_H
+#endif // PROPERTY_H
