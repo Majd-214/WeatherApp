@@ -48,22 +48,22 @@ int main() {
 
         // Process the user's menu choice.
         switch (choice) {
-            case 1: // Get Current Weather
+            case 1: { // Get Current Weather - Braces optional here as no variables declared
                 std::cout << "\nFetching Current Weather..." << std::endl;
                 report = apiConverter.getCurrentWeather(); // Fetch and store report
                 break;
-
-            case 2: // Get Hourly Forecast
+            }
+            case 2: { // Get Hourly Forecast - Braces optional here
                 std::cout << "\nFetching Hourly Forecast..." << std::endl;
                 report = apiConverter.getForecastReport(prefs.getForecastDays(), ForecastReport::DetailLevel::HOURLY);
                 break;
-
-            case 3: // Get Daily Forecast
+            }
+            case 3: { // Get Daily Forecast - Braces optional here
                 std::cout << "\nFetching Daily Forecast Summary..." << std::endl;
                  report = apiConverter.getForecastReport(prefs.getForecastDays(), ForecastReport::DetailLevel::DAILY);
                 break;
-
-            case 4: // Update Location
+            }
+            case 4: { // Update Location - **ADDED BRACES**
                 std::string newLocation = UI::getTextInput("Enter new location (e.g., City, zip, lat,lon): ");
                 if (!newLocation.empty()) {
                     prefs.setLocation(newLocation);       // Update preferences object
@@ -74,8 +74,8 @@ int main() {
                 }
                 UI::pauseScreen(); // Wait for user before continuing loop
                 continue; // Skip report display for this iteration
-
-            case 5: // Update Units
+            } // ** END BRACE **
+            case 5: { // Update Units - **ADDED BRACES**
                  std::string newUnits = UI::getUnitsInput(); // Get validated "Metric" or "Imperial"
                  if (prefs.setUnits(newUnits)) { // Update prefs (validated)
                       apiConverter.setUnits(newUnits); // Update API converter state
@@ -83,8 +83,8 @@ int main() {
                  } // else: setUnits already printed a warning
                  UI::pauseScreen();
                  continue; // Skip report display
-
-             case 6: // Update Forecast Days
+            } // ** END BRACE **
+             case 6: { // Update Forecast Days - **ADDED BRACES**
                 int newDays = UI::getForecastDaysInput(); // Get validated 1-14
                 if (prefs.setForecastDays(newDays)) { // Update prefs (validated)
                     // No direct update needed for apiConverter here, it reads days on request
@@ -92,15 +92,16 @@ int main() {
                 } // else: setForecastDays already printed a warning
                  UI::pauseScreen();
                  continue; // Skip report display
-
-            case EXIT_CHOICE: // Exit
+            } // ** END BRACE **
+            case EXIT_CHOICE: { // Exit - Braces optional here
                 std::cout << "Exiting Weather App..." << std::endl;
                 continue; // Proceed to loop termination condition
-
-            default: // Should not happen due to getMenuChoice validation
+            }
+            default: { // Should not happen due to getMenuChoice validation - Braces optional here
                 std::cerr << "Error: Invalid menu choice detected." << std::endl;
                  UI::pauseScreen();
                  continue;
+            }
         } // End switch
 
         // --- Display Report (if a report was generated) ---
