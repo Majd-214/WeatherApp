@@ -60,7 +60,7 @@ int main() {
             }
             case 3: { // Get Daily Forecast - Braces optional here
                 std::cout << "\nFetching Daily Forecast Summary..." << std::endl;
-                 report = apiConverter.getForecastReport(prefs.getForecastDays(), ForecastReport::DetailLevel::DAILY);
+                report = apiConverter.getForecastReport(prefs.getForecastDays(), ForecastReport::DetailLevel::DAILY);
                 break;
             }
             case 4: { // Update Location - **ADDED BRACES**

@@ -7,7 +7,7 @@ This C++ console application fetches and displays current weather conditions and
 ## Features
 
 * **Current Weather:** Displays detailed current conditions (temperature, feels like, wind direction/speed, humidity, pressure, visibility, precipitation, etc.). Wind direction shows both cardinal (e.g., NW) and degrees.
-* **Forecast:** Provides daily summary forecasts and detailed hourly forecasts for a configurable number of days (1-14). Includes the day of the week (e.g., Tuesday). Daily summaries show wind direction with cardinal and degrees; hourly tables show cardinal only for brevity.
+* **Forecast:** Provides daily summary forecasts and detailed hourly forecasts for a configurable number of days (1-3). Includes the day of the week (e.g., Tuesday). Daily summaries show wind direction with cardinal and degrees; hourly tables show cardinal only for brevity.
 * **Configurable Settings:**
     * API Key management (prompts user if missing).
     * Location setting (accepts city name, zip code, lat/lon).

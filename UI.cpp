@@ -25,7 +25,7 @@ void UI::displayMenu() {
     cout << "3. Get Daily Forecast" << endl;
     cout << "4. Update Location" << endl;
     cout << "5. Update Units (Metric/Imperial)" << endl;
-    cout << "6. Update Forecast Days (1-14)" << endl;
+    cout << "6. Update Forecast Days (1-3)" << endl;
     cout << "7. Exit" << endl;
     cout << "========================" << endl;
 }
@@ -91,13 +91,14 @@ string UI::getTextInput(const string& prompt) {
     return input;
 }
 
-// Gets the desired number of forecast days from the user, validating the range [1, 14].
+// Gets the desired number of forecast days from the user, validating the range [1, 3].6
+
 int UI::getForecastDaysInput() {
      int days = 0;
-     cout << "Enter new number of forecast days (1-14): ";
-     // Loop until valid integer input within the range [1, 14] is received.
-      while (!(cin >> days) || days < 1 || days > 14) {
-        cout << "Invalid input. Please enter a number between 1 and 14: ";
+     cout << "Enter new number of forecast days (1-3): ";
+     // Loop until valid integer input within the range [1, 3] is received.
+      while (!(cin >> days) || days < 1 || days > 3) {
+        cout << "Invalid input. Please enter a number between 1 and 3: ";
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }

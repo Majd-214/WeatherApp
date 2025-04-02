@@ -173,9 +173,9 @@ unique_ptr<CurrentWeatherReport> APIConverter::getCurrentWeather() {
 
 // Fetches and parses forecast weather data from the API.
 unique_ptr<ForecastReport> APIConverter::getForecastReport(int days, ForecastReport::DetailLevel detail) {
-     // Pre-flight checks.
+    // Pre-flight checks.
      if (apiKey.empty() || location.empty() ) { cerr << "Error: API Key or Location not set." << endl; return nullptr; }
-     if (days < 1 || days > 14) { cerr << "Error: Invalid forecast days requested (1-14)." << endl; return nullptr; } // WeatherAPI limit
+     if (days < 1 || days > 3) { cerr << "Error: Invalid forecast days requested (1-3)." << endl; return nullptr; } // WeatherAPI limit
      if (!client) { cerr << "Error: HTTP client not initialized." << endl; return nullptr; }
 
     // Construct forecast API request URL.

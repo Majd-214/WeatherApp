@@ -13,7 +13,7 @@ private:
     std::string location;
     std::string units;       // Expected: "Metric" or "Imperial"
     std::string datamode;    // Currently unused setting ("basic", "advanced")
-    int forecastDays;        // Number of days for forecast (e.g., 1-14)
+    int forecastDays;        // Number of days for forecast (e.g., 1-3)
 
     // File handling variable.
     std::string settingsFilename; // Name of the file to load/save settings.
